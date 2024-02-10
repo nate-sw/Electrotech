@@ -14,7 +14,8 @@
 .global lcd_line_dw
 .global lcd_msg_dsp
 .include "delays.inc"
-
+.equ     ADRR1 = $2000 ; Memory address for LCD's control
+.equ     ADRR2 = $2100 ; Memory address for LCD's data
 
 init_lcd:
         RCALL dly50msi
@@ -75,6 +76,9 @@ lcdio_ret:
     STS   ADRR1, R16
     RET
 
+lcd_msg_call:
+    MOV   R30,R24
+    MOV   R31,R25
 
 lcd_msg_dsp:
     LPM   R16, Z+
