@@ -8,14 +8,9 @@
 ; 2023-12-04: Created
 ; 2024-02-09: Code imported from PBL, 
 
-.global init_lcd
-.global lcd_clr
-.global lcd_line_up
-.global lcd_line_dw
-.global lcd_msg_dsp
-.include "delays.inc"
-.equ     ADRR1 = $2000 ; Memory address for LCD's control
-.equ     ADRR2 = $2100 ; Memory address for LCD's data
+
+;.equ     ADRR1 = $2000 ; Memory address for LCD's control
+;.equ     ADRR2 = $2100 ; Memory address for LCD's data
 
 init_lcd:
         RCALL dly50msi
@@ -39,21 +34,16 @@ init_lcd:
         RCALL dly50usi
 
 ;init_msg0:
+        RCALL lcd_line_up
         LDI   R31, HIGH(msg0<<1)
         LDI   R30, LOW(msg0<<1)
         RCALL dly2ms
         CLR   R16
 
 ;startup:
-        RCALL lcd_line_up
-        RCALL lcd_line_dw
-        LDI   R31, HIGH(msg1<<1)
-        LDI   R30, LOW(msg1<<1)
-        RCALL dly50usi
         RCALL lcd_msg_dsp
         RCALL dly4s
         RET
-
 lcd_clr:
     LDI   R16, $01 ;clear display
     RJMP  lcdio_ret
@@ -76,13 +66,13 @@ lcdio_ret:
     STS   ADRR1, R16
     RET
 
-lcd_msg_call:
-    MOV   R30,R24
-    MOV   R31,R25
+;lcd_msg_call:
+;    MOV   R30,R24
+;    MOV   R31,R25
 
 lcd_msg_dsp:
     LPM   R16, Z+
-    CPI   R16, $00
+    CPI     R16,$00
     BREQ  lcd_msg_ret
     RCALL lcd_puts
     RCALL dly10ms

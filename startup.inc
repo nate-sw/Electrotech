@@ -7,7 +7,7 @@
 ; Changelog:
 ; 2023-12-15: File created
 
-pgm_start:
+init_lcd:
         RCALL dly50msi
 ;fctn_set:               
         LDI   R16, $38 ;function set
@@ -36,12 +36,7 @@ pgm_start:
 
 ;startup:
         RCALL lcd_line_up
-        RCALL lcd_line_dw
-        LDI   R31, HIGH(msg1<<1)
-        LDI   R30, LOW(msg1<<1)
-        RCALL dly50usi
+        CLR   R16
         RCALL lcd_msg_dsp
         RCALL dly4s
-
-
         RET
