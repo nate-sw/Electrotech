@@ -7,8 +7,9 @@
 .include "m8515def.inc"
 
 .cseg
-.equ     ADRR1 = $2000 ; Memory address for LCD's control
-.equ     ADRR2 = $2100 ; Memory address for LCD's data
+.equ        BUSON = $82
+.equ        ADRR1 = $2000 ; Memory address for LCD's control
+.equ        ADRR2 = $2100 ; Memory address for LCD's data
 
 
 
@@ -17,6 +18,9 @@ init0:
     OUT     SPL,R16
     LDI     R16,HIGH(RAMEND)
     OUT     SPL,R16
+
+    LDI     R16,BUSON
+    OUT     MCUCR,R16
     RCALL   init_lcd
 
 init_spi:
@@ -34,7 +38,7 @@ test:
     RCALL   spi_rfid_ping
     MOV     R31,R17
     MOV     R30,R18
-    RCALL lcd_msg_dsp
+    RCALL   lcd_msg_dsp
 
 
 msg0:    .db   $0D, "RFID Tag", $00
