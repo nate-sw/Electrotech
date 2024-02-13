@@ -79,6 +79,16 @@ lcd_msg_dsp:
     RCALL dly50msi
     RJMP  lcd_msg_dsp
 
+lcd_rfid_dsp:
+    ;LPM   R16, Z+ ;disabled for test
+    ;CPI     R16,$00 ;disabled for test
+    ;BREQ  lcd_msg_ret ;disabled for test
+    RCALL lcd_puts
+    RCALL dly10ms
+    RCALL dly50msi
+    rjmp       lcd_msg_ret 
+    RJMP  lcd_rfid_dsp
+
 lcd_msg_ret:
     RET
 

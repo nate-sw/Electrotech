@@ -7,7 +7,7 @@
 ; Changelog:
 ; 2023-12-15: File created
 
-init_lcd:
+startup:
         RCALL dly50msi
 ;fctn_set:               
         LDI   R16, $38 ;function set

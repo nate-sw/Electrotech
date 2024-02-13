@@ -1,4 +1,4 @@
-#ifndef asm_func.h
+/*#ifndef asm_func.h
 #define asm_func.h
 
 extern void init_lcd(void);
@@ -9,3 +9,4 @@ extern void lcd_msg_call(char* tagData);
 
 
 #endif // asm_func.h
+*/
