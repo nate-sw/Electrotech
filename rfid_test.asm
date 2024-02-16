@@ -39,11 +39,12 @@ init0:
 
 
 init_spi:
+    SEI ;Enables interrupt
     ;Set MOSI, SCK and PB0 to output, all others input
     LDI     R16, (1<<DDB1)|(1<<DDB4)|(1<<DDB5)|(1<<DDB7)
     OUT     DDRB,R16
     ;Enable SPI, Master, set clock rate fck/16
-    LDI     R16,$55 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR0)
+    LDI     R16,$57 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR1)|(1<<SPR0)
     OUT     SPCR,R16
 
 init_RFID_main:

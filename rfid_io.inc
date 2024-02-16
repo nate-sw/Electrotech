@@ -77,10 +77,12 @@ spi_rfid_read: ;Response.
 spi_cmd_addr:
     ;Set NSS to Low
     CBI     PORTB,0
+    RCALL dly50usi
     ;Send address and command
     OUT     SPDR,R17
     OUT     SPDR,R18
     ;Set NSS to High
+    RCALL dly50usi
     SBI     PORTB,0
     RET
 
@@ -93,10 +95,12 @@ spi_wait:
 spi_cmd_fifo:
     ;Set NSS to Low
     CBI     PORTB,0
+    RCALL dly50usi
     ;Send address and command
     OUT     SPDR,R17
     OUT     SPDR,R18
     OUT     SPDR,R19
     ;Set NSS to High
+    RCALL dly50usi
     SBI     PORTB,0
     RET
