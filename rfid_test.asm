@@ -21,6 +21,7 @@ temp_buf:   .byte 1
 
 
 init0:
+    SEI ;Enables interrupt
     LDI     R16, $80
     OUT     MCUCR, R16
     LDI     R16, $00
@@ -33,34 +34,64 @@ init0:
     OUT     SPH, R16
 
 
-    RCALL   dly50usi
-    RCALL   init_lcd
+    ;RCALL   dly50usi
+    ;RCALL   init_lcd
     ;rjmp init0 ;for testing only
 
 
 init_spi:
     SEI ;Enables interrupt
-    ;Set MOSI, SCK and PB0 to output, all others input
-    LDI     R16, (1<<DDB1)|(1<<DDB4)|(1<<DDB5)|(1<<DDB7)
+    ;Set ~SS, MOSI & SCK to output, all others input
+    LDI     R16,$B3 ;(1<<DDB0)|(1<<DDB1)|(1<<DDB4)|(1<<DDB5)|(1<<DDB7)
     OUT     DDRB,R16
-    ;Enable SPI, Master, set clock rate fck/16
-    LDI     R16,$57 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR1)|(1<<SPR0)
+    ;Enable SPI, Master, set clock rate fck/128
+    LDI     R16,$00
+    OUT     SPSR,R16
+    LDI     R16,$53 ;(1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)
     OUT     SPCR,R16
+    CBI     PORTB,0
+    SBI     PORTB,1
 
 init_RFID_main:
     RCALL   init_rfid
 
-test:
-    CLR     R17
-    CLR     R18
-    RCALL   spi_rfid_ping
-    RCALL   lcd_line_dw
-    LDS     R16,temp_buf
-    RCALL   lcd_rfid_dsp
 
+test:
+    CBI     PORTB,1
+    LDI     R16,$00
+    RCALL   RC663_write_reg
+    LDI     R16,$07
+    RCALL   RC663_write_reg
+    SBI     PORTB,1
+
+    NOP
+    NOP
+    NOP
+    NOP
+    NOP
+
+    CBI     PORTB,1
+    LDI     R16,$05
+    RCALL   RC663_read_reg
+    MOV     R19, R17
+    LDI     R16,$05
+    RCALL   RC663_read_reg
+    MOV     R18, R17
+    LDI     R16,$00
+    RCALL   RC663_write_reg
+    SBI     PORTB,1
+
+    OUT     PORTA,R18
 
 fini:
     rjmp    fini
+
+spi_wait:
+    SBIS    SPSR,SPIF
+    RJMP    spi_wait
+    RET
+
+
 
 msg0:    .db   $0D, "RFID Tag", $00
 

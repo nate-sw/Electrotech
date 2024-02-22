@@ -11,7 +11,7 @@ init0:
 init_spi:
     SEI ;Enables interrupt
     ;Set ~SS, MOSI & SCK to output, all others input
-    LDI     R16,$B1 ;(1<<DDB1)|(1<<DDB4)|(1<<DDB5)|(1<<DDB7)
+    LDI     R16,$B3 ;(1<<DDB0)|(1<<DDB1)|(1<<DDB4)|(1<<DDB5)|(1<<DDB7)
     OUT     DDRB,R16
     ;Enable SPI, Master, set clock rate fck/128
     LDI     R16,$00
@@ -19,6 +19,7 @@ init_spi:
     LDI     R16,$57 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR1)|(1<<SPR0)
     OUT     SPCR,R16
     CBI     PORTB,0
+    SBI     PORTB,1
 
 init_temp_sens:
     SBI     PORTB,0

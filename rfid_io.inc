@@ -9,98 +9,109 @@
 ;R19 - Used for command (fifo only)
 
 init_rfid: ;Currently configured for ISO 14443
-    SBI     PORTB,0
+    ;
+    CBI     PORTB,1
+    LDI     R16,$00
+    RCALL   RC663_write_reg
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$02
+    RCALL   RC663_write_reg
+    LDI     R16,$B0
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$05
+    RCALL   RC663_write_reg
+    LDI     R16,$00
+    RCALL   RC663_data
+    LDI     R16,$00
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$00
+    RCALL   RC663_write_reg
+    LDI     R16,$0D
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$28
+    RCALL   RC663_write_reg
+    LDI     R16,$8E
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$06
+    RCALL   RC663_write_reg
+    LDI     R16,$7F
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$2C
+    RCALL   RC663_write_reg
+    LDI     R16,$18
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$2D
+    RCALL   RC663_write_reg
+    LDI     R16,$18
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;     
+    CBI     PORTB,1
+    LDI     R16,$2E
+    RCALL   RC663_write_reg
+    LDI     R16,$0F
+    RCALL   RC663_data
+    SBI     PORTB,1
+    ;                ;     
+    CBI     PORTB,1
+    LDI     R16,$05
+    RCALL   RC663_write_reg
+    LDI     R16,$26
+    RCALL   RC663_data
+    SBI     PORTB,1
 
-    LDI     R17,$00
-    LDI     R18,$00
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$02
-    LDI     R18,$B0
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$05
-    LDI     R18,$00
-    LDI     R19,$00
-    RCALL   spi_cmd_fifo
-    RCALL dly50usi
-    LDI     R17,$00
-    LDI     R18,$0D
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$02
-    LDI     R18,$B0
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$28
-    LDI     R18,$8E
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$06
-    LDI     R18,$7F
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$2C
-    LDI     R18,$18
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$2D
-    LDI     R18,$18
-    RCALL   spi_cmd_addr
-    RCALL dly50usi
-    LDI     R17,$2E
-    LDI     R18,$0F
-    RCALL   spi_cmd_addr
+    RET
+    ;    
+
+RC663_write_reg:
+    LSL     R16
+    OUT     SPDR,R16
+    RCALL   RC663_wait
+    RET
+
+RC663_read_reg:
+    ;LDI     R16,$FF ;junk data to continue spi
+    LSL     R16
+    SBR     R16, $01
+    OUT     SPDR,R16
+    RCALL   RC663_wait
+    IN      R17,SPDR
+    RET
+
+RC663_data:
+    OUT     SPDR,R16
+    RCALL   RC663_wait
+    RET
+
+RC663_wait:
+    SBIS    SPSR,SPIF
+    RJMP    RC663_wait
+    RET
+
+RC663_reg_cmd:
+
+
+
+
     
-    RET
-
-spi_rfid_ping: ;Template.
-    LDI     R17,$05
-    LDI     R18,$26
-    RCALL   spi_cmd_addr
-
-    LDI     R17,$00
-    LDI     R18,$07
-    RCALL   spi_cmd_addr
-
-
-spi_rfid_read: ;Response.
-    SBIS    SPSR,SPIF
-    RJMP    spi_rfid_read
-    in      R16,SPDR
-    STS     temp_buf,R16
-    LDI     R17,$05
-    LDI     R18,$05
-    RCALL   spi_cmd_fifo
-    RET
-
-spi_cmd_addr:
-    ;Set NSS to Low
-    CBI     PORTB,0
-    RCALL dly50usi
-    ;Send address and command
-    OUT     SPDR,R17
-    OUT     SPDR,R18
-    ;Set NSS to High
-    RCALL dly50usi
-    SBI     PORTB,0
-    RET
-
-spi_wait:
-    SBIS    SPSR,SPIF
-    RJMP    spi_wait
-    RET
-
-
-spi_cmd_fifo:
-    ;Set NSS to Low
-    CBI     PORTB,0
-    RCALL dly50usi
-    ;Send address and command
-    OUT     SPDR,R17
-    OUT     SPDR,R18
-    OUT     SPDR,R19
-    ;Set NSS to High
-    RCALL dly50usi
-    SBI     PORTB,0
-    RET
