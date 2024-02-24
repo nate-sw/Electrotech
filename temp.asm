@@ -16,12 +16,17 @@ init_spi:
     ;Enable SPI, Master, set clock rate fck/128
     LDI     R16,$00
     OUT     SPSR,R16
-    LDI     R16,$57 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR1)|(1<<SPR0)
+    LDI     R16,$53 ;(1<<SPE)|(1<<MSTR) |(1<<SPR1)|(1<<SPR0)
     OUT     SPCR,R16
     CBI     PORTB,0
     SBI     PORTB,1
 
 init_temp_sens:
+
+    ;Clock Phase has to be set 1, only for temperature sensor.
+    LDI     R16,$57 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR1)|(1<<SPR0)
+    OUT     SPCR,R16
+
     SBI     PORTB,0
     NOP
     LDI     R16,$80 ;Control register's Write address
@@ -69,8 +74,11 @@ wait_temp2:
     RCALL   dly1s
     RJMP    get_temp1
 
-fini:
-    RJMP    fini
+temp_spi_done:
+    ;Clock Phase reset to 0 for rfid operation.
+    LDI     R16,$53 ;(1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0)
+    OUT     SPCR,R16
+    RET
 
 
 

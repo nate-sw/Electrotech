@@ -75,13 +75,15 @@ test:
     RCALL   RC663_read_reg
     MOV     R19, R17
     LDI     R16,$05
-    RCALL   RC663_read_reg
+    RCALL   RC663_data
     MOV     R18, R17
     LDI     R16,$00
-    RCALL   RC663_write_reg
+    RCALL   RC663_data
     SBI     PORTB,1
 
     OUT     PORTA,R18
+
+    rjmp    test
 
 fini:
     rjmp    fini

@@ -16,6 +16,9 @@ init_rfid: ;Currently configured for ISO 14443
     RCALL   RC663_data
     SBI     PORTB,1
     ;     
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$02
     RCALL   RC663_write_reg
@@ -23,6 +26,9 @@ init_rfid: ;Currently configured for ISO 14443
     RCALL   RC663_data
     SBI     PORTB,1
     ;     
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$05
     RCALL   RC663_write_reg
@@ -32,13 +38,19 @@ init_rfid: ;Currently configured for ISO 14443
     RCALL   RC663_data
     SBI     PORTB,1
     ;     
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$00
     RCALL   RC663_write_reg
     LDI     R16,$0D
     RCALL   RC663_data
     SBI     PORTB,1
-    ;     
+    ;   
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$28
     RCALL   RC663_write_reg
@@ -46,13 +58,19 @@ init_rfid: ;Currently configured for ISO 14443
     RCALL   RC663_data
     SBI     PORTB,1
     ;     
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$06
     RCALL   RC663_write_reg
     LDI     R16,$7F
     RCALL   RC663_data
     SBI     PORTB,1
-    ;     
+    ;   
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$2C
     RCALL   RC663_write_reg
@@ -60,6 +78,9 @@ init_rfid: ;Currently configured for ISO 14443
     RCALL   RC663_data
     SBI     PORTB,1
     ;     
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$2D
     RCALL   RC663_write_reg
@@ -67,13 +88,19 @@ init_rfid: ;Currently configured for ISO 14443
     RCALL   RC663_data
     SBI     PORTB,1
     ;     
+    NOP
+    NOP
+
     CBI     PORTB,1
     LDI     R16,$2E
     RCALL   RC663_write_reg
     LDI     R16,$0F
     RCALL   RC663_data
     SBI     PORTB,1
-    ;                ;     
+    ;      
+    NOP
+    NOP
+                
     CBI     PORTB,1
     LDI     R16,$05
     RCALL   RC663_write_reg
@@ -93,7 +120,12 @@ RC663_write_reg:
 RC663_read_reg:
     ;LDI     R16,$FF ;junk data to continue spi
     LSL     R16
+
+    ;LDI     R25, $01
+    ;ADD     R16,R25
+
     SBR     R16, $01
+
     OUT     SPDR,R16
     RCALL   RC663_wait
     IN      R17,SPDR
