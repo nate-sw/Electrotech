@@ -1,0 +1,178 @@
+;
+; getche_test
+; 2024-03-05
+; Author : nsw
+;
+
+.include "m8515def.inc"
+
+.dseg
+
+
+main_buf:   .byte 17 ;One byte spare
+nums_buf:  .byte 7 ;this is fairly inefficient use of memory, but it should work
+chk_buf:    .byte 3 ;One byte s
+
+
+.cseg
+
+
+;The code below was originally written by Nick Markou in file termio.inc
+.equ FCPU_L  = 1000000 ;used by termio rtn 
+.equ BAUD  = 4800    ;desired baud rate
+
+.equ  UBRR  = (FCPU_L /(16 * BAUD)) -1   ;see p.138 (important)	
+.equ  FRAME = $86      ;8N1 standard frame
+.equ  TXE = $18        ;Transmit & receive enable     
+.equ  LF = $0A		   ;ASCII line feed
+.equ  CR = $0D		   ;ASCII carriage return
+.equ  SOTE = $02	       ;ASCII start of text
+.equ  EOTE = $03	   ;ASCII end of text
+.equ  EOTX = $04	   ;ASCII end of transmission
+.equ  EOTB = $17	   ;ASCII end of transmission block
+
+.equ        ADRR1 = $2000 ; Memory address for LCD's control
+.equ        ADRR2 = $2100 ; Memory address for LCD's data
+
+init0:
+    LDI     R16, LOW(RAMEND)
+    OUT     SPL, R16
+    LDI     R16, HIGH(RAMEND)
+    OUT     SPH, R16
+    LDI     R17,$30 ;Used for nums_conv
+    RCALL   init_lcd
+
+
+init_uart:                 
+	ldi R16, 0	       ;always zero (mostly)
+	out UBRRH, R16    
+	ldi R16, UBRR	 
+	out UBRRL, R16     ;config. the rate of data tx 
+	ldi R16, TXE      
+	out UCSRB, R16     ;enable port tx (see p.158)
+	ldi R16, FRAME     ;defined in calling     
+	out UCSRC, R16     ;config. frame elements 
+	;ret
+
+;Code below was written by nsw
+
+tag_read_init:
+    LDI     R27,HIGH(main_buf)
+    LDI     R26,LOW(main_buf)
+    LDI     R29,HIGH(nums_buf)
+    LDI     R28,LOW(nums_buf)
+
+avr_getch:
+    IN      R16, UCSRA
+    ANDI    R16, $80
+    BREQ    avr_getch
+    IN      R16, UDR
+    ST      X+,R16
+    CPI     R16,EOTX
+    BREQ    chk_init
+    RJMP    avr_getch
+
+chk_init:
+    LDI     R27,HIGH(main_buf)
+    LDI     R26,LOW(main_buf)
+
+tag_lcd_out:
+    LD      R16,X+
+    CPI     R16,$41 ;ASCII A
+    BRLO    cmd_chk
+    CPI     R16,$5B ;ASCII char after Z
+    BRSH    cmd_chk
+    RCALL   lcd_puts ;Calls the subroutine to put the character on the lcd
+    RJMP    tag_lcd_out
+
+cmd_chk:
+    CPI     R16,SOTE ;end of text, return to tag_lcd_out
+    BREQ    tag_lcd_out
+    CPI     R16,EOTE ;end of text, go to nums_conv
+    BREQ    nums_conv_init
+    CPI     R16,EOTB ;end of text, go to checksum
+    BREQ    checksum_init
+    CPI     R16,EOTX ;end of text, go to end_of_tx
+    BREQ    end_of_tx
+
+nums_conv_init:
+    LDI     R16,$20;ASCII for space
+    RCALL   lcd_puts
+nums_conv:
+    LD      R16,X+
+    MOV     R19,R16 ;Most significant nibble
+    MOV     R18,R16 ;Least significant nibble
+    ANDI    R19,$F0
+    LSR     R19
+    LSR     R19
+    LSR     R19
+    LSR     R19
+    ST      Y+,R19 ;Used for checksum
+    ANDI    R18,$0F
+    ST      Y+,R18 ;Used for checksum
+    ADD     R19,R17
+    ADD     R18,R17
+    MOV     R16,R19
+    RCALL   lcd_puts
+    MOV     R18,R19
+    RCALL   lcd_puts
+    CPI     R16,EOTB ;end of text, go to checksum
+    BREQ    checksum_init
+    RJMP    tag_lcd_out
+    
+checksum_init:
+    LD      R21,X+;Reporting mark checksum
+    LD      R20,X+;ID checksum
+    LDI     R31, HIGH(msg0<<1)
+    LDI     R30, LOW(msg0<<1)
+
+    RCALL   lcd_line_dw
+
+checksum:
+    ;TEST CODE, WILL BE REPLACED LATER
+    ;PUSH    R27
+    ;PUSH    R26
+    
+    ;RCALL   lcd_msg_dsp
+
+    ;LDI     R27,HIGH(main_buf>>4) ;Load reporting mark
+    ;LDI     R26,LOW(main_buf>>4)
+    ;CLR     R10;Used to compare with checksum
+    LD      R16,X+
+
+
+    
+
+end_of_tx:
+;Empty for now, will add code later
+
+avr_outch:	
+    OUT     UDR, R16		;txmt char. out the TxD 
+    ;IN      R16, UCSRA 	
+    ;ANDI    R16, $20   	
+    ;BREQ    avr_outch
+    LD      R16,X+
+    CPI     R16,EOTX ;end of text, go to end_of_tx
+    BREQ    fini 
+    rjmp    avr_outch
+
+fini:
+    RJMP    fini
+
+.include "delays.inc"
+.include "lcdio.inc"
+
+msg0:    .db "OK", $00
+
+
+
+init_in_to_out:
+    LDI     R27,HIGH(in_buf)
+    LDI     R26,LOW(in_buf)
+
+in_to_out:
+    LD      R16,X+
+    ST      Y+,R16
+    CPI     R16,EOTB
+    BREQ    init_avr_outch
+    RJMP    in_to_out
