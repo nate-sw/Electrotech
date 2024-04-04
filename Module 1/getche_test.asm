@@ -6,17 +6,7 @@
 
 .include "m8515def.inc"
 
-.dseg
-
-
-buf_in:   .byte 17 ;One byte spare
-;buf_out:  .byte 13 ;One byte spare
-
-
 .cseg
-
-
-
 
 ;The code below was originally written by Nick Markou in file termio.inc
 .equ FCPU_L  = 1000000 ;used by termio rtn 
@@ -30,7 +20,6 @@ buf_in:   .byte 17 ;One byte spare
 .equ  SOTE = $02	       ;ASCII start of text
 .equ  EOTE = $03	   ;ASCII end of text
 .equ  EOTX = $04	   ;ASCII end of transmission
-.equ  EOTB = $17	   ;ASCII end of transmission block
 
 .equ        ADRR1 = $2000 ; Memory address for LCD's control
 .equ        ADRR2 = $2100 ; Memory address for LCD's data
@@ -40,6 +29,13 @@ init0:
     OUT     SPL, R16
     LDI     R16, HIGH(RAMEND)
     OUT     SPH, R16
+    ;init bus
+    LDI     R16,$82
+    OUT     MCUCR,R16
+
+    RCALL   init_lcd
+
+    RCALL   lcd_line_dw
 
 
 init_uart:                 
@@ -51,50 +47,29 @@ init_uart:
 	out UCSRB, R16     ;enable port tx (see p.158)
 	ldi R16, FRAME     ;defined in calling     
 	out UCSRC, R16     ;config. frame elements 
-	;ret
 
 ;Code below was written by nsw
 
-tag_read_init:
-    LDI     R27,HIGH(buf_in)
-    LDI     R26,LOW(buf_in)
-    ;LDI     R29,HIGH(buf_out)
-    ;LDI     R28,LOW(buf_out)
-
+getch_start:
+    RCALL   lcd_line_dw
 
 avr_getch:
     IN      R16, UCSRA
     ANDI    R16, $80
     BREQ    avr_getch
     IN      R16, UDR
-    ;ST      X+,R16
-    ;CPI     R16,EOTX
-    ;BREQ    init_avr_outch
-    ;BREQ    init_in_to_out
     RJMP    avr_outch
     
+avr_outch:
+    OUT     UDR, R16		;txmt char. out the TxD 
+    CPI     R16,EOTX ;end of transmission
+    BREQ    getch_start
+    CPI     R16,$1F 
+    BRLO    avr_getch
+    RCALL   lcd_puts
     RJMP    avr_getch
 
-init_avr_outch:
-    LDI     R27,HIGH(buf_in)
-    LDI     R26,LOW(buf_in)
-    ;LDI     R29,HIGH(buf_out)
-    ;LDI     R28,LOW(buf_out)
 
-avr_outch_start:
-    LD      R16,X+
-    
-avr_outch:	
-    OUT     UDR, R16		;txmt char. out the TxD 
-    ;IN      R17, UCSRA 	
-    ;ANDI    R17, $20   	
-    ;BREQ    avr_outch
-
-    rjmp    avr_getch
-
-    ;CPI     R16,EOTB ;end of text, go to end_of_tx
-    ;BREQ    tag_read_init
-    ;RJMP    avr_outch_start
 
 fini:
     RJMP    fini
@@ -102,4 +77,4 @@ fini:
 .include "delays.inc"
 .include "lcdio.inc"
 
-msg0:    .db "OK", $00
+msg0:    .db " TAG ID:", $00

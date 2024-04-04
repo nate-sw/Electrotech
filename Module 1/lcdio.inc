@@ -66,28 +66,14 @@ lcdio_ret:
     STS   ADRR1, R16
     RET
 
-;lcd_msg_call:
-;    MOV   R30,R24
-;    MOV   R31,R25
-
 lcd_msg_dsp:
     LPM   R16, Z+
-    CPI     R16,$00
+    CPI   R16,$00
     BREQ  lcd_msg_ret
     RCALL lcd_puts
     RCALL dly10ms
     RCALL dly50msi
     RJMP  lcd_msg_dsp
-
-lcd_rfid_dsp:
-    ;LPM   R16, Z+ ;disabled for test
-    ;CPI     R16,$00 ;disabled for test
-    ;BREQ  lcd_msg_ret ;disabled for test
-    RCALL lcd_puts
-    RCALL dly10ms
-    RCALL dly50msi
-    rjmp       lcd_msg_ret 
-    RJMP  lcd_rfid_dsp
 
 lcd_msg_ret:
     RET
