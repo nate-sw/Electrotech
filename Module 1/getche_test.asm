@@ -9,7 +9,7 @@
 .cseg
 
 ;The code below was originally written by Nick Markou in file termio.inc
-.equ FCPU_L  = 1000000 ;used by termio rtn 
+.equ FCPU_L  = 1000000 ;UP frequency
 .equ BAUD  = 4800    ;desired baud rate
 
 .equ  UBRR  = (FCPU_L /(16 * BAUD)) -1   ;see p.138 (important)	
@@ -39,7 +39,7 @@ init0:
 
 
 init_uart:                 
-	ldi R16, 0	       ;always zero (mostly)
+	ldi R16, 0	       
 	out UBRRH, R16    
 	ldi R16, UBRR	 
 	out UBRRL, R16     ;config. the rate of data tx 
@@ -54,14 +54,14 @@ getch_start:
     RCALL   lcd_line_dw
 
 avr_getch:
-    IN      R16, UCSRA
-    ANDI    R16, $80
+    IN      R16,UCSRA
+    ANDI    R16,$80
     BREQ    avr_getch
-    IN      R16, UDR
+    IN      R16,UDR
     RJMP    avr_outch
     
 avr_outch:
-    OUT     UDR, R16		;txmt char. out the TxD 
+    OUT     UDR,R16		;txmt char. out the TxD 
     CPI     R16,EOTX ;end of transmission
     BREQ    getch_start
     CPI     R16,$1F 

@@ -12,6 +12,4 @@
     $query = "INSERT INTO yard (tag, cargroup, cartype, rmark, num, timestmp) VALUES ('$tag', '$cargroup', '$cartype', '$rmark', '$number', '$timestamp')";
     mysqli_query($conn, $query);
 
-
-    header("Location: ../list.php?entry=success");
-
+?>

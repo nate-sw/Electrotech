@@ -36,7 +36,7 @@ body {
 }
 
 
-#container {
+.container {
     margin-top: 120px; /* Adjusted margin-top to provide more space */
     padding-top: 20px;
     margin-left: auto;
@@ -44,24 +44,24 @@ body {
     width: 80%;
 }
 
-#container table {
+.container table {
     width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-#container th, #container td {
+.container th, .container td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
 
-#container th {
+.container th {
     background-color: #4285f4; /* Blue */
     color: white;
 }
 
-#container td {
+.container td {
     background-color: #f2f2f2;
 }
