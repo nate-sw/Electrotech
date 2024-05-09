@@ -1,10 +1,36 @@
 .include "m8515def.inc"
 
+.equ FCPU_L  = 1000000 ;UP frequency
+.equ BAUD  = 4800    ;desired baud rate
+
+.equ  UBRR  = (FCPU_L /(16 * BAUD)) -1   ;see p.138 (important)	
+.equ  FRAME = $86      ;8N1 standard frame
+.equ  TXE = $18        ;Transmit & receive enable     
+.equ  LF = $0A		   ;ASCII line feed
+.equ  CR = $0D		   ;ASCII carriage return
+.equ  SOTE = $02	       ;ASCII start of text
+.equ  EOTE = $03	   ;ASCII end of text
+.equ  EOTX = $04	   ;ASCII end of transmission
+
+
 init0:
     LDI     R16,LOW(RAMEND)
     OUT     SPL,R16
     LDI     R16,HIGH(RAMEND)
     OUT     SPH,R16
+    ;init bus
+    ;LDI     R16,$82
+    ;OUT     MCUCR,R16
+
+init_uart:                 
+	ldi R16, 0	       
+	out UBRRH, R16    
+	ldi R16, UBRR	 
+	out UBRRL, R16     ;config. the rate of data tx 
+	ldi R16, TXE      
+	out UCSRB, R16     ;enable port tx (see p.158)
+	ldi R16, FRAME     ;defined in calling     
+	out UCSRC, R16     ;config. frame elements
 
 init_spi:
     SEI ;Enables interrupt
@@ -16,6 +42,8 @@ init_spi:
     OUT     SPSR,R16
     LDI     R16,$57 ;(1<<SPE)|(1<<MSTR)|(1<<CPHA)|(1<<SPR1)|(1<<SPR0)
     OUT     SPCR,R16
+
+
 
 init_temp_sens:
     SBI     PORTB,0
@@ -36,6 +64,14 @@ wait_temp_init2:
     CBI     PORTB,0
     RCALL   dly200ms
 
+avr_getch:
+    IN      R16,UCSRA
+    ANDI    R16,$80
+    BREQ    avr_getch
+    IN      R16,UDR
+    CPI     R16,$74; checks for t character
+    BREQ    get_temp1
+    RJMP    avr_getch
 
 
 get_temp1:
@@ -59,9 +95,10 @@ wait_temp2:
     IN      R16,SPDR
     NOP
     CBI     PORTB,0
-    OUT     PORTA,R16
+    OUT     UDR,R16		
     RCALL   dly1s
-    RJMP    get_temp1
+
+    rjmp    avr_getch
 
 temp_done:
     RET
