@@ -17,7 +17,7 @@ function getMillisecondsUntilNextInterval() {
   const seconds = now.getSeconds();
 
   // Calculate the milliseconds until the next 10-minute interval
-  return ((10 - (minutes % 10)) * 60 - seconds) * 1000;
+  return ((5 - (minutes % 5)) * 60 - seconds) * 1000;
 }
 
 // Function to start the interval timer
@@ -39,38 +39,18 @@ ws.on('open', function open() {
 
 ws.on('message', function incoming(data) {
     console.log('Received data from server:', data);
-  
 
-
-    if(data.startsWith('t')){
-      // Pass the received temperature data to a PHP script for processing
-      exec(`php ../includes/temp.inc.php "${data}"`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing PHP script: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`PHP script error: ${stderr}`);
-          return;
-        }
-      });
-
-
-    }
-
-    else{
-      // Pass the received tag data to a PHP script for processing
-      exec(`php ../includes/entry.inc.php "${data}"`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing PHP script: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`PHP script error: ${stderr}`);
-          return;
-        }
-      });
-    }
+    // Pass the received tag data to a PHP script for processing
+    exec(`php ../includes/entry.inc.php "${data}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing PHP script: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`PHP script error: ${stderr}`);
+        return;
+      }
+    });
   });
 
 ws.on('close', function close() {
