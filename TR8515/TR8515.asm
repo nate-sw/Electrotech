@@ -1,5 +1,5 @@
 ;
-; RFID-TMS 
+; TR8515 
 ; Created: 2024-03-05 (as getche_test)
 ; Renamed: 2024-05-12
 ; Author : nsw
