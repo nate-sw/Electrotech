@@ -17,7 +17,7 @@ function getMillisecondsUntilNextInterval() {
   const seconds = now.getSeconds();
 
   // Calculate the milliseconds until the next 10-minute interval
-  return ((5 - (minutes % 5)) * 60 - seconds) * 1000;
+  return ((2 - (minutes % 2)) * 60 - seconds) * 1000;
 }
 
 // Function to start the interval timer
